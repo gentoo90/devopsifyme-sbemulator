@@ -1,4 +1,5 @@
 ﻿using ServiceBusEmulator.Abstractions.Domain;
+using ServiceBusEmulator.Abstractions.Security;
 using System.Security.Cryptography.X509Certificates;
 
 namespace ServiceBusEmulator.Abstractions.Options
@@ -8,6 +9,11 @@ namespace ServiceBusEmulator.Abstractions.Options
     /// </summary>
     public class ServiceBusEmulatorOptions
     {
+        /// <summary>
+        /// Type of authentication: `Sas` or `Jwt`
+        /// </summary>
+        public AuthenticationType AuthType { get; set; } = AuthenticationType.Sas;
+
         /// <summary>
         /// Returns the <see cref="X509Certificate2"/> used to setup secure links, or null if none set.
         /// </summary>

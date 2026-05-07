@@ -15,9 +15,7 @@ internal class SR
 
 namespace ServiceBusEmulator.Security
 {
-
-
-    internal class CbsTokenValidator : ITokenValidator
+    internal class CbsSasTokenValidator : ITokenValidator
     {
         private const string DefaultSharedAccessKeyName = "all";
         private const string DefaultSharedAccessKey = "CLwo3FQ3S39Z4pFOQDefaiUd1dSsli4XOAj3Y9Uh1E=";
@@ -28,13 +26,13 @@ namespace ServiceBusEmulator.Security
         private const string SignedKeyName = "skn";
         private const string SignedExpiry = "se";
 
-        public static CbsTokenValidator Default { get; } = new CbsTokenValidator(DefaultSharedAccessKeyName, DefaultSharedAccessKey);
+        public static CbsSasTokenValidator Default { get; } = new CbsSasTokenValidator(DefaultSharedAccessKeyName, DefaultSharedAccessKey);
 
         public string SharedAccessKeyName { get; }
 
         public string SharedAccessKey { get; }
 
-        public CbsTokenValidator(string sharedAccessKeyName, string sharedAccessKey)
+        public CbsSasTokenValidator(string sharedAccessKeyName, string sharedAccessKey)
         {
             SharedAccessKeyName = sharedAccessKeyName ?? throw new ArgumentNullException(nameof(sharedAccessKeyName));
             SharedAccessKey = sharedAccessKey ?? throw new ArgumentNullException(nameof(sharedAccessKey));
@@ -56,8 +54,7 @@ namespace ServiceBusEmulator.Security
                 throw new ArgumentException(null, nameof(token));
             }
 
-            System.Collections.Generic.Dictionary<string, string> query = token
-[SasFullName.Length..]
+            System.Collections.Generic.Dictionary<string, string> query = token[SasFullName.Length..]
                 .Split(new[] { SasPairSeparator }, StringSplitOptions.None)
                 .Select(pair => pair.Split(new[] { SasKeyValueSeparator }, 2, StringSplitOptions.None))
                 .ToDictionary(pair => pair[0], pair => pair.Length > 1 ? pair[1] : null);

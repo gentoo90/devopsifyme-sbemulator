@@ -1,6 +1,7 @@
 ﻿using Amqp.Listener;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using ServiceBusEmulator.Abstractions.Options;
 using ServiceBusEmulator.Abstractions.Security;
 using ServiceBusEmulator.InMemory;
@@ -24,7 +25,15 @@ namespace ServiceBusEmulator
             _ = services.AddTransient<ISecurityContext>(sp => SecurityContext.Default);
 
             _ = services.AddTransient<CbsRequestProcessor>();
-            _ = services.AddTransient<ITokenValidator>(sp => CbsTokenValidator.Default);
+            _ = services.AddTransient<ITokenValidator>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<ServiceBusEmulatorOptions>>();
+                return options.Value.AuthType switch
+                {
+                    AuthenticationType.Sas => CbsSasTokenValidator.Default,
+                    AuthenticationType.Jwt => CbsJwtTokenValidator.Default
+                };
+            });
 
             _ = services.AddOptions<ServiceBusEmulatorOptions>().Configure(configure).PostConfigure(options =>
             {
@@ -39,7 +48,7 @@ namespace ServiceBusEmulator
                 {
                     options.ServerCertificate = new X509Certificate2(options.ServerCertificatePath, options.ServerCertificatePassword, X509KeyStorageFlags.Exportable);
                 }
-            }).BindConfiguration("Emulator"); ;
+            }).BindConfiguration("Emulator");
 
             _ = services.AddTransient<ServiceBusEmulatorHost>();
             _ = services.AddSingleton<IHostedService, ServiceBusEmulatorWorker>();
